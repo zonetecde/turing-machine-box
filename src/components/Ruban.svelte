@@ -12,38 +12,7 @@
 		1425: -4
 	};
 
-	const lists: (string | number | null)[] = [
-		0,
-		1,
-		1,
-		0,
-		null,
-		null,
-		0,
-		1,
-		0,
-		1,
-		0,
-		1,
-		1,
-		0,
-		5000,
-		null,
-		0,
-		1,
-		0,
-		1,
-		0,
-		1,
-		1,
-		0,
-		null,
-		null,
-		0,
-		1,
-		0,
-		1
-	];
+	const lists: (string | number | null)[] = [1, 1, null, 1, 1, 1]; // to 1 1 1 1 1
 
 	// On ajoute des éléments nulls au début et à la fin du ruban pour l'effet infini
 	// Nombre d'éléments nulls à ajouter au début et à la fin du ruban
@@ -134,48 +103,48 @@
 	}
 </script>
 
-<div class={'w-[' + rubanWidth + 'px] ' + 'h-[' + (cellSize + 10) + 'px]'}>
-	<div
-		bind:this={ruban}
-		class="h-full overflow-x-hidden flex items-row border-t-2 border-b-2 bg-white border-black [mask-image:linear-gradient(90deg,#0000,#000,#000,#000,#0000)]"
-	>
-		{#each showedElements as element}
-			<section
-				class={'h-full flex justify-center items-center border-l border-r border-black relative ' +
-					'min-w-[' +
-					cellSize +
-					'px]'}
-			>
-				<p class="text-3xl font-bold select-none">{element ?? ''}</p>
-			</section>
-		{/each}
+<div class="w-full flex justify-center">
+	<div style="height: {cellSize + 10}px; width: {rubanWidth}px">
+		<div
+			bind:this={ruban}
+			class="h-full overflow-x-hidden flex items-row border-t-2 border-b-2 bg-white border-black [mask-image:linear-gradient(90deg,#0000,#000,#000,#000,#0000)]"
+		>
+			{#each showedElements as element}
+				<section
+					class={'h-full flex justify-center items-center border-l border-r border-black relative'}
+					style="min-width: {cellSize}px;"
+				>
+					<p class="text-3xl font-bold select-none">{element ?? ''}</p>
+				</section>
+			{/each}
+		</div>
+
+		<!-- Curseur -->
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke-width="1.5"
+			stroke="skyblue"
+			data-slot="icon"
+			class="w-6 h-6 absolute left-1/2 -top-7 z-20 bg-blue-700 rounded-full pt-0.5"
+		>
+			<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+		</svg>
 	</div>
 
-	<!-- Curseur -->
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		fill="none"
-		viewBox="0 0 24 24"
-		stroke-width="1.5"
-		stroke="skyblue"
-		data-slot="icon"
-		class="w-6 h-6 absolute left-1/2 -top-7 z-20 bg-blue-700 rounded-full pt-0.5"
-	>
-		<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-	</svg>
+	<style>
+		::-webkit-scrollbar {
+			height: 5px;
+		}
+
+		::-webkit-scrollbar-track {
+			background-color: #ffffff;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: rgba(0, 0, 0, 0.75);
+			border-radius: 10px;
+		}
+	</style>
 </div>
-
-<style>
-	::-webkit-scrollbar {
-		height: 5px;
-	}
-
-	::-webkit-scrollbar-track {
-		background-color: #ffffff;
-	}
-
-	::-webkit-scrollbar-thumb {
-		background-color: rgba(0, 0, 0, 0.75);
-		border-radius: 10px;
-	}
-</style>
