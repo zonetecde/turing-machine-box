@@ -16,7 +16,7 @@
 
 	// On ajoute des éléments nulls au début et à la fin du ruban pour l'effet infini
 	// Nombre d'éléments nulls à ajouter au début et à la fin du ruban
-	let paddingElements = 10;
+	let paddingElements = 18;
 	// On concatène les éléments nulls avec la liste affichée
 	$: showedElements = Array(paddingElements)
 		.fill(null)
