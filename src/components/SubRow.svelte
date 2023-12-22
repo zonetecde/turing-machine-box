@@ -114,8 +114,10 @@
 							// Les chaines qui restent vide = on lit une case vide
 
 							// Vérifie que ce n'est pas une valeur interdite
-							if (forbiddenValues.includes(value)) value = null;
-							toast.error('Une règle de cet état lit déjà cette valeur');
+							if (forbiddenValues.includes(value)) {
+								value = null;
+								toast.error('Une règle de cet état lit déjà cette valeur.');
+							}
 
 							editMode = false;
 						}, 100);
