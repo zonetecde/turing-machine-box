@@ -12,7 +12,7 @@
 		1425: -4
 	};
 
-	const lists: (string | number | null)[] = [1, 1, null, 1, 1, 1]; // to 1 1 1 1 1
+	const lists: (string | number | null)[] = [1, 1, 1, 0]; // to 1 1 1 0 1 1 1
 
 	// On ajoute des éléments nulls au début et à la fin du ruban pour l'effet infini
 	// Nombre d'éléments nulls à ajouter au début et à la fin du ruban
@@ -100,6 +100,39 @@
 			);
 
 		cursorOffset = offsets[rubanWidth];
+	}
+
+	/**
+	 * Déplace le curseur d'une case dans la direction donnée
+	 * @param direction Direction dans laquelle déplacer le curseur
+	 */
+	export function moveCursor(direction: 'left' | 'right') {
+		if (direction === 'left') cursorPosition--;
+		else cursorPosition++;
+	}
+
+	/**
+	 * Lit la cellule à la position du curseur
+	 */
+	export function readCell(): string | number | null {
+		let cell = lists[cursorPosition];
+		if (cell === undefined || cell === null) cell = '';
+		return cell;
+	}
+
+	/**
+	 * Écrit dans la cellule à la position du curseur
+	 * @param value Valeur à écrire
+	 */
+	export function writeCell(value: string | number | null) {
+		if (cursorPosition < 0) {
+			lists.unshift(...Array(Math.abs(cursorPosition)).fill(null));
+			cursorPosition = 0;
+		}
+		if (cursorPosition >= lists.length) {
+			lists.push(...Array(cursorPosition - lists.length + 1).fill(null));
+		}
+		lists[cursorPosition] = value;
 	}
 </script>
 
