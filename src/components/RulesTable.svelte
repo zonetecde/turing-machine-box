@@ -41,12 +41,11 @@
 		<div class="mx-auto w-10/12 border-2 border-slate-500 shadow-xl shadow-slate-600">
 			<Rule header={true} />
 			{#each rules as rule}
-				<Rule bind:rule {rules} />
+				<Rule bind:state={rule} states={rules} />
 			{/each}
 		</div>
 	</div>
 
-	<!-- Add button -->
 	<div class="flex justify-center mt-5 relative gap-x-5">
 		<label
 			class="bg-green-700 duration-150 rounded-md shadow-md shadow-green-900 text-white px-3 py-1"

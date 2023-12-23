@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
 	import type Etat from '../models/Etat';
+	import { playingState } from '../stores/store';
 
 	export let value: string | number | null | undefined = ''; // Valeur de la cellule
 	export let last: boolean = false; // Si c'est la dernière cellule de la ligne
@@ -10,16 +11,29 @@
 	export let parentStateName: string;
 	export let forbiddenValues: any[] = []; // Valeurs interdites (si empty alors aucune valeur n'est interdite)
 
+	export let stateId: number; // Id de l'état
+	export let ruleId: number;
+
 	// Gère l'affichage du nom de l'état
 	export let isStateSelection = false; // Si c'est une sélection d'état
 	export let etats: Etat[] = []; // Liste des états (pour récupérer leur nom)
 	$: etatName = etats.find((x) => x.id === value)?.nom; // Nom de l'état (s'update automatiquement quand son nom change)
 
 	let editMode = false;
+
+	let currentPlayingState: { ruleId: number; stateId: number };
+	const unsubscribe = playingState.subscribe((value) => {
+		currentPlayingState = value;
+	});
 </script>
 
 {#if value !== null}
-	<div class="relative">
+	<div
+		class={'relative ' +
+			(currentPlayingState.stateId === stateId && currentPlayingState.ruleId === ruleId
+				? 'bg-green-400'
+				: '')}
+	>
 		{#if !editMode}
 			<div class="relative">
 				<button

@@ -3,6 +3,7 @@
 	import Ruban from '../components/Ruban.svelte';
 	import RulesTable from '../components/RulesTable.svelte';
 	import Etat, { Readable } from '../models/Etat';
+	import { playingState } from '../stores/store';
 
 	// let rules: Etat[] = [
 	// 	new Etat(
@@ -43,6 +44,7 @@
 	];
 
 	let ruban: Ruban;
+	const speed = 1000 * 0.5;
 
 	/**
 	 * Lance l'algorithme d'exécution
@@ -50,30 +52,48 @@
 	function handleExecuteButtonClicked() {
 		let currentState = rules.find((rule) => rule.start === true);
 
-		const limitedInterval = setInterval(() => {
+		if (currentState === undefined) {
+			playingState.set({
+				stateId: -5,
+				ruleId: -5
+			});
+			return;
+		}
+
+		/**
+		 * Fonction récursive pour exécuter les règles de la machine de Turing
+		 * @param {Etat} state - L'état actuel
+		 */
+		async function executeRules(state: Etat) {
 			// Regarde la lecture de la case actuelle
 			const currentCell = ruban.readCell();
 
 			// Cherche la règle correspondante dans l'état actuel
-			const rule = currentState?.readables.find(
+			const rule = state?.readables.find(
 				(readable) => readable.symbole?.toString() === currentCell?.toString()
 			);
 
-			console.log(currentCell);
-			console.log(rule);
-			console.log(currentState);
-
 			if (rule === undefined) {
-				// Boucle infini, on arrête
-				clearInterval(limitedInterval);
+				// Boucle infinie, on arrête
+				playingState.set({
+					stateId: -5,
+					ruleId: -5
+				});
 				return;
 			}
+
+			playingState.set({
+				stateId: state.id,
+				ruleId: rule.id
+			});
 
 			// Regarde les actions de la règle
 			// Nouvelle valeur
 			if (rule.nouvelleValeur !== null) {
 				// Ecrit la nouvelle valeur
 				ruban.writeCell(rule.nouvelleValeur);
+
+				await new Promise((resolve) => setTimeout(resolve, speed / 2));
 			}
 			// Direction
 			if (rule.direction !== null) {
@@ -83,12 +103,38 @@
 			if (rule.nouvelEtatId !== null) {
 				if (rule.nouvelEtatId === -1) {
 					// Fin
-					clearInterval(limitedInterval);
+					playingState.set({
+						stateId: -5,
+						ruleId: -5
+					});
 					return;
 				}
-				currentState = rules.find((_rule) => _rule.id === rule.nouvelEtatId);
+				const nextState = rules.find((_rule) => _rule.id === rule.nouvelEtatId);
+
+				if (nextState === undefined) {
+					playingState.set({
+						stateId: -5,
+						ruleId: -5
+					});
+					return;
+				}
+
+				setTimeout(() => {
+					executeRules(nextState);
+				}, speed);
+			} else {
+				// On reste dans le même état
+				setTimeout(() => {
+					executeRules(state);
+				}, speed);
 			}
-		}, 1450);
+		}
+
+		if (currentState === undefined) {
+			return;
+		}
+
+		executeRules(currentState);
 	}
 </script>
 

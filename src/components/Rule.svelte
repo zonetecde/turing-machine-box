@@ -4,15 +4,19 @@
 	import type Etat from '../models/Etat';
 	import SubRow from './SubRow.svelte';
 	import { error } from '@sveltejs/kit';
+	import { playingState } from '../stores/store';
 
-	export let rule: Etat | null = null;
+	export let state: Etat | null = null;
 	export let header: boolean = false;
-	export let rules: Etat[] = [];
+	export let states: Etat[] = [];
 
 	let modifyStateName = false;
 
-	$: if (rule && rule.nom) {
-	}
+	let currentPlayingState: { ruleId: number; stateId: number };
+
+	const unsubscribe = playingState.subscribe((value) => {
+		currentPlayingState = value;
+	});
 </script>
 
 {#if header}
@@ -35,9 +39,9 @@
 			</section>
 		</div>
 	</div>
-{:else if rule != null}
+{:else if state != null}
 	<div class="w-full min-h-[40px] flex flex-row border border-black relative">
-		{#if rule.start}
+		{#if state.start}
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -60,42 +64,46 @@
 				<input
 					type="text"
 					class="text-2xl pb-1 outline-none text-center bg-transparent"
-					bind:value={rule.nom}
+					bind:value={state.nom}
 					autofocus
 					maxlength="15"
 					on:keyup={(e) => {
 						if (e.key === 'Enter') modifyStateName = false;
 					}}
 					on:blur={() => {
-						if (rule) {
+						if (state) {
 							// vérifie qu'il n'a pas le nom 'Fin'
-							if (rule.nom === 'Fin') {
+							if (state.nom === 'Fin') {
 								toast.error("Un état ne peut pas s'appeler 'Fin'");
-								rule.nom = 'q' + Math.floor(Math.random() * 1000);
+								state.nom = 'q' + Math.floor(Math.random() * 1000);
 							}
 
 							// vérifie qu'il n'y a pas deux états qui ont le même nom
-							if (rules.filter((r) => r.nom === rule?.nom).length > 1) {
+							if (states.filter((r) => r.nom === state?.nom).length > 1) {
 								toast.error('Deux états ne peuvent pas avoir le même nom');
-								rule.nom = 'q' + Math.floor(Math.random() * 1000);
+								state.nom = 'q' + Math.floor(Math.random() * 1000);
 							} else {
-								if (rule.nom.trim() === '') rule.nom = 'q' + Math.floor(Math.random() * 1000);
+								if (state.nom.trim() === '') state.nom = 'q' + Math.floor(Math.random() * 1000);
 								modifyStateName = false;
 							}
 						}
 					}}
 				/>
 			{:else}
-				<div class="relative w-full h-full flex items-center justify-center">
+				<div
+					class={'relative w-full h-full flex items-center justify-center ' +
+						(currentPlayingState.stateId === state.id ? 'bg-green-400' : 'bg-slate-200')}
+				>
 					<button on:click={() => (modifyStateName = true)}>
-						<p class="text-2xl pb-1">{rule.nom}</p>
+						<p class="text-2xl pb-1">{state.nom}</p>
 					</button>
 
 					<!-- Add 'Readable' button -->
 					<button
 						class="absolute right-2 bottom-2 w-6 h-6"
 						on:click={() => {
-							if (rule) rule.readables = [...rule.readables, new Readable(null, null, null, null)];
+							if (state)
+								state.readables = [...state.readables, new Readable(null, null, null, null)];
 						}}
 					>
 						<svg
@@ -118,49 +126,57 @@
 		</div>
 		<div class="w-5/6 bg-white grid grid-cols-4">
 			<section class="border-r-2 border-black flex flex-col">
-				{#each rule.readables as readable, i}
+				{#each state.readables as readable, i}
 					<SubRow
+						ruleId={readable.id}
+						stateId={state.id}
 						bind:value={readable.symbole}
-						last={i === rule.readables.length - 1}
-						parentStateName={rule.nom}
-						forbiddenValues={rule.readables
-							.filter((r) => r.symbole !== null && rule && r.id !== readable.id)
+						last={i === state.readables.length - 1}
+						parentStateName={state.nom}
+						forbiddenValues={state.readables
+							.filter((r) => r.symbole !== null && state && r.id !== readable.id)
 							.map((r) => r.symbole)}
 					/>
 				{/each}
 			</section>
 			<section class="w-3/13 border-r-2 border-black flex flex-col">
-				{#each rule.readables as readable, i}
+				{#each state.readables as readable, i}
 					<SubRow
+						ruleId={readable.id}
+						stateId={state.id}
 						bind:value={readable.nouvelleValeur}
-						last={i === rule.readables.length - 1}
-						parentStateName={rule.nom}
+						last={i === state.readables.length - 1}
+						parentStateName={state.nom}
 					/>
 				{/each}
 			</section>
 			<section class="w-3/13 border-r-2 border-black flex flex-col">
-				{#each rule.readables as readable, i}
+				{#each state.readables as readable, i}
 					<SubRow
+						ruleId={readable.id}
+						stateId={state.id}
 						bind:value={readable.direction}
-						last={i === rule.readables.length - 1}
+						last={i === state.readables.length - 1}
 						acceptNull={false}
 						maxLength={5}
 						acceptableValues={['left', 'right']}
-						parentStateName={rule.nom}
+						parentStateName={state.nom}
 					/>
 				{/each}
 			</section>
 			<section class="w-3/13 flex flex-col">
-				{#each rule.readables as readable, i}
+				{#each state.readables as readable, i}
 					<SubRow
-						etats={rules}
+						ruleId={readable.id}
+						stateId={state.id}
+						etats={states}
 						bind:value={readable.nouvelEtatId}
-						last={i === rule.readables.length - 1}
+						last={i === state.readables.length - 1}
 						maxLength={99}
 						acceptNull={false}
-						acceptableValues={rules.map((r) => r.nom)}
+						acceptableValues={states.map((r) => r.nom)}
 						isStateSelection={true}
-						parentStateName={rule.nom}
+						parentStateName={state.nom}
 					/>
 				{/each}
 			</section>
