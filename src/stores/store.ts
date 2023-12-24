@@ -6,4 +6,7 @@ const playingStateS = {
 	ruleId: 0
 };
 
+const cursorPosS: number = -2;
+
 export const playingState = writable(playingStateS);
+export const cursorPos = writable(cursorPosS);

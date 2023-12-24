@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import { cursorPos } from '../stores/store';
 
 	let cellSize = 85; // Taille d'une cellule du ruban
 
@@ -13,7 +14,7 @@
 		1425: -4
 	};
 
-	const lists: (string | number | null)[] = [1, 1, 1, 0]; // to 1 1 1 0 1 1 1
+	export let values: (string | number | null)[] = []; // Valeurs du ruban
 
 	// On ajoute des éléments nulls au début et à la fin du ruban pour l'effet infini
 	// Nombre d'éléments nulls à ajouter au début et à la fin du ruban
@@ -21,7 +22,7 @@
 	// On concatène les éléments nulls avec la liste affichée
 	$: showedElements = Array(paddingElements)
 		.fill(null)
-		.concat(lists)
+		.concat(values)
 		.concat(Array(paddingElements).fill(null));
 
 	let ruban: HTMLDivElement;
@@ -39,7 +40,12 @@
 
 	let rubanWidth = 745; // Taille du ruban
 	let cursorOffset = 0; // Offset du curseur (par rapport à la taille du ruban)
-	let cursorPosition = -2; // 0 = début du ruban.
+
+	let cursorPosition = -2;
+	cursorPos.subscribe((value) => {
+		cursorPosition = value;
+	});
+
 	$: firstElementRelativeIndex = showedElements.findIndex((element) => element !== null);
 
 	$: {
@@ -110,14 +116,16 @@
 	export function moveCursor(direction: 'left' | 'right') {
 		if (direction === 'left') cursorPosition--;
 		else cursorPosition++;
+
+		cursorPos.set(cursorPosition);
 	}
 
 	/**
 	 * Lit la cellule à la position du curseur
 	 */
 	export function readCell(): string | number | null {
-		let cell = lists[cursorPosition];
-		if (cell === undefined || cell === null) cell = '';
+		let cell = values[cursorPosition];
+		if (cell === undefined || cell === null || cell === ' ') cell = '';
 		return cell;
 	}
 
@@ -127,13 +135,13 @@
 	 */
 	export function writeCell(value: string | number | null) {
 		if (cursorPosition < 0) {
-			lists.unshift(...Array(Math.abs(cursorPosition)).fill(null));
+			values.unshift(...Array(Math.abs(cursorPosition)).fill(null));
 			cursorPosition = 0;
 		}
-		if (cursorPosition >= lists.length) {
-			lists.push(...Array(cursorPosition - lists.length + 1).fill(null));
+		if (cursorPosition >= values.length) {
+			values.push(...Array(cursorPosition - values.length + 1).fill(null));
 		}
-		lists[cursorPosition] = value;
+		values[cursorPosition] = value;
 	}
 </script>
 
