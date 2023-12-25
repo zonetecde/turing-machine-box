@@ -91,9 +91,41 @@
 				/>
 			{:else}
 				<div
+					id="stateName"
 					class={'relative w-full h-full flex items-center justify-center ' +
 						(currentPlayingState.stateId === state.id ? 'bg-green-400' : 'bg-slate-200')}
 				>
+					<!-- Delete button -->
+					<button
+						id="deleteStateButton"
+						class="absolute left-1.5 bottom-3 w-6 h-6 hidden"
+						on:click={() => {
+							if (state) {
+								if (state.start) {
+									toast.error("L'état de départ ne peut pas être supprimé");
+									return;
+								}
+
+								states = states.filter((r) => r.id !== state?.id);
+							}
+						}}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-8 w-8 stroke-current inline-block mr-1 text-red-800 bg-red-300 rounded-full p-1"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							/>
+						</svg>
+					</button>
+
 					<button on:click={() => (modifyStateName = true)}>
 						<p class="text-2xl pb-1">{state.nom}</p>
 					</button>
@@ -128,6 +160,7 @@
 			<section class="border-r-2 border-black flex flex-col">
 				{#each state.readables as readable, i}
 					<SubRow
+						bind:etats={states}
 						ruleId={readable.id}
 						stateId={state.id}
 						bind:value={readable.symbole}
@@ -142,6 +175,7 @@
 			<section class="w-3/13 border-r-2 border-black flex flex-col">
 				{#each state.readables as readable, i}
 					<SubRow
+						bind:etats={states}
 						ruleId={readable.id}
 						stateId={state.id}
 						bind:value={readable.nouvelleValeur}
@@ -153,6 +187,7 @@
 			<section class="w-3/13 border-r-2 border-black flex flex-col">
 				{#each state.readables as readable, i}
 					<SubRow
+						bind:etats={states}
 						ruleId={readable.id}
 						stateId={state.id}
 						bind:value={readable.direction}
@@ -169,7 +204,7 @@
 					<SubRow
 						ruleId={readable.id}
 						stateId={state.id}
-						etats={states}
+						bind:etats={states}
 						bind:value={readable.nouvelEtatId}
 						last={i === state.readables.length - 1}
 						maxLength={99}
@@ -183,3 +218,9 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	#stateName:hover #deleteStateButton {
+		display: block;
+	}
+</style>

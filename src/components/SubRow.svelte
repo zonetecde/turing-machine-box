@@ -16,7 +16,7 @@
 
 	// Gère l'affichage du nom de l'état
 	export let isStateSelection = false; // Si c'est une sélection d'état
-	export let etats: Etat[] = []; // Liste des états (pour récupérer leur nom)
+	export let etats: Etat[]; // Liste des états (pour récupérer leur nom)
 	$: etatName = etats.find((x) => x.id === value)?.nom; // Nom de l'état (s'update automatiquement quand son nom change)
 
 	let editMode = false;
@@ -25,10 +25,62 @@
 	const unsubscribe = playingState.subscribe((value) => {
 		currentPlayingState = value;
 	});
+
+	function handleShowContextMenu(
+		event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }
+	) {
+		if (event.button !== 2) return;
+
+		document.querySelectorAll('#context-menu').forEach((x) => x.remove());
+
+		const menu = document.createElement('div');
+		menu.id = 'context-menu';
+		menu.className = 'absolute z-50 bg-white border border-black shadow-lg';
+		menu.style.left = event.clientX + 'px';
+		menu.style.top = event.clientY + 'px';
+		menu.style.width = 'max-content';
+		menu.style.height = 'max-content';
+		menu.style.padding = '0.5rem';
+
+		const deleteButton = document.createElement('button');
+		deleteButton.className = 'w-full text-left';
+		deleteButton.textContent = 'Supprimer la règle';
+		deleteButton.onclick = () => {
+			// delete rule
+			etats = etats.map((x) => {
+				if (x.id === stateId) {
+					x.readables = x.readables.filter((x) => x.id !== ruleId);
+				}
+				return x;
+			});
+
+			toast.success('Règle supprimée.');
+		};
+
+		menu.appendChild(deleteButton);
+
+		document.body.appendChild(menu);
+
+		const closeMenu = () => {
+			document.body.removeEventListener('click', closeMenu);
+			menu.remove();
+		};
+
+		document.body.addEventListener('click', closeMenu);
+
+		document.body.addEventListener('contextmenu', function (event) {
+			event.preventDefault();
+		});
+
+		event.preventDefault();
+
+		event.stopPropagation();
+	}
 </script>
 
 {#if value !== null}
 	<div
+		on:mousedown={handleShowContextMenu}
 		class={'relative ' +
 			(currentPlayingState.stateId === stateId && currentPlayingState.ruleId === ruleId
 				? 'bg-green-400'
