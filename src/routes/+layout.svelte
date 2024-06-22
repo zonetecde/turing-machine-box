@@ -1,6 +1,17 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import '../App.css';
 	import { Toaster } from 'svelte-sonner';
+
+	onMount(() => {
+		//@ts-ignore
+		kofiWidgetOverlay.draw('zonetecde', {
+			type: 'floating-chat',
+			'floating-chat.donateButton.text': 'Support me',
+			'floating-chat.donateButton.background-color': '#323842',
+			'floating-chat.donateButton.text-color': '#fff'
+		});
+	});
 </script>
 
 <Toaster />
@@ -19,10 +30,8 @@
 		>
 		<br />
 
-		<a
-			class="text-red-800 hover:underline"
-			target="_blank"
-			href="https://www.buymeacoffee.com/zonetecde">Buy me a coffee</a
+		<a class="text-red-800 hover:underline" target="_blank" href="https://ko-fi.com/zonetecde"
+			>Support me</a
 		>
 	</p>
 </div>
