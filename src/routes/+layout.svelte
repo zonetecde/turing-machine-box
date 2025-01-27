@@ -30,7 +30,7 @@
 		>
 		<br />
 
-		<a class="text-red-800 hover:underline" target="_blank" href="https://ko-fi.com/zonetecde"
+		<a class="text-red-800 hover:underline" target="_blank" href="https://ko-fi.com/vzero"
 			>Support me</a
 		>
 	</p>
